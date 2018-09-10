@@ -128,7 +128,7 @@ class KNearestNeighbor(object):
     A=np.sum(X*X,axis=1).reshape(-1,1)#500*1,x^2
     B=np.sum(self.X_train*self.X_train,axis=1).reshape(-1,1)#5000*1,y^2
     xx=-2*X.dot(self.X_train.T)+A#500*5000+500*1，broadcast,x^2-2xy
-    xx=xx+B.T#5000*500+1*5000,broadcast,在其中有维度为1时才可以
+    xx=xx+B.T#5000*500+5000*1,broadcast,在其中有维度为1时才可以
     dists=np.sqrt(xx)
     #########################################################################
     #                         END OF YOUR CODE                              #

@@ -76,7 +76,10 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    #这是一个两层的神经网络，使用relu作为激活函数
+    Z1=X.dot(W1)+b1
+    A1=np.maximum(Z1,0)
+    scores=A1.dot(W2)+b2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
