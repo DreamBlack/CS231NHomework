@@ -68,6 +68,7 @@ class TwoLayerNet(object):
     W1, b1 = self.params['W1'], self.params['b1']
     W2, b2 = self.params['W2'], self.params['b2']
     N, D = X.shape
+    
 
     # Compute the forward pass
     scores = None
@@ -96,7 +97,16 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
-    pass
+    #Input:X,output:scores,使用softmax损失函数，计算Loss
+    #scores=scores-np.max(scores,axis=1,keepdims=True)
+    p=np.exp(scores)/np.sum(np.exp(scores),axis=1,keepdims=True)
+    y_class=np.zeros_like(p)
+    y_class[range(N),y]=1.0
+    loss=-np.sum(np.log(p)*y_class)
+    loss/=N
+    #加上正则化项，有个问题，这里到底要不要乘以0.5，乘以的话，数据就和答案不太对
+    loss+=reg*np.sum(np.square(W1))
+    loss+=reg*np.sum(np.square(W2))
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -108,7 +118,26 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    #一层一层，从后往前推，把每个中间层的导数也算一下
+    dscores=p
+    dscores[range(N),y]-=1.0
+    dscores/=N#这边不是求w的导数，所以不用乘以X.T
+    
+    dW2=A1.T.dot(dscores)+2*reg*W2
+    db2=np.sum(dscores,axis=0)
+    
+    dA1=dscores.dot(W2.T)
+    dZ=dA1
+    dZ[Z1<=0]=0#MAX(0,z1)的导数，这里不应该是dZ[dZ<=0]=0而是Z<=0,这个错找了半天
+    
+    dW1=X.T.dot(dZ)+2*reg*W1
+    db1=np.sum(dZ,axis=0)
+
+    grads['W2']=dW2
+    grads['b2']=db2
+    grads['W1']=dW1
+    grads['b1'] = db1
+    
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -152,7 +181,10 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      #千万别少一个参数，是从num_train中随机抽取batch_size个，否则就成了抽取一个
+      idx=np.random.choice(num_train,batch_size,replace=True)
+      X_batch=X[idx]
+      y_batch=y[idx]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -167,7 +199,14 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      dW1=grads['W1']
+      db1=grads['b1']
+      dW2=grads['W2']
+      db2=grads['b2']
+      self.params['W1']-=learning_rate*dW1
+      self.params['b1']-=learning_rate*db1
+      self.params['W2']-=learning_rate*dW2
+      self.params['b2']-=learning_rate*db2
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -212,7 +251,14 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    W1=self.params['W1']
+    b1=self.params['b1']
+    W2=self.params['W2']
+    b2=self.params['b2']
+    Z1=X.dot(W1)+b1
+    A1=np.maximum(0,Z1)
+    scores=A1.dot(W2)+b2
+    y_pred=np.argmax(scores,axis=1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
