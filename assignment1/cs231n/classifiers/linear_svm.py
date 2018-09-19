@@ -112,7 +112,7 @@ def svm_loss_vectorized(W, X, y, reg):
   temp[temp>0]=1
   temp[temp<=0]=0
   #对于syj
-  row_sum=np.sum(temp,axis=1)#1*N
+  row_sum=np.sum(temp,axis=1)#
   temp[np.arange(num_train),y]=-row_sum
   dW+=X.T.dot(temp)
   dW/=num_train
