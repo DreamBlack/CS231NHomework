@@ -101,8 +101,8 @@ class Solver(object):
         - lr_decay: A scalar for learning rate decay; after each epoch the
           learning rate is multiplied by this value.
         - batch_size: Size of minibatches used to compute loss and gradient
-          during training.
-        - num_epochs: The number of epochs to run for during training.
+          during training.随机梯度下降的更新梯度时用到的批次个数
+        - num_epochs: The number of epochs to run for during training.需要对所有训练数据训练几次
         - print_every: Integer; training losses will be printed every
           print_every iterations.
         - verbose: Boolean; if set to false then no output will be printed
@@ -261,7 +261,9 @@ class Solver(object):
         num_train = self.X_train.shape[0]
         iterations_per_epoch = max(num_train // self.batch_size, 1)
         num_iterations = self.num_epochs * iterations_per_epoch
-
+        #Epoch, Batch, Iteration
+        #共有num_train个训练数据，批次为batch_size，则训练完一次所有数据，需要max(num_train // self.batch_size, 1)次
+        #而共需要这种完整的训练num_epochs次，因此总共要迭代self.num_epochs * iterations_per_epoch次
         for t in range(num_iterations):
             self._step()
 

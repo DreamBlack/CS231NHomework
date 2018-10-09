@@ -25,6 +25,7 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
+    
     temp=x.reshape((x.shape[0],-1))
     out=temp.dot(w)
     out+=b
@@ -178,7 +179,21 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variance, storing your result in the running_mean and running_var   #
         # variables.                                                          #
         #######################################################################
-        pass
+        #
+        
+        
+        sample_mean=np.mean(x,axis=0)
+        sample_var=np.var(x,axis=0)#var是方差，std是标准差
+        
+        #注意这里和机器学习里面的归一化不太一样，除以的是经过数值处理的根号方差
+        mout=(x-sample_mean)/np.sqrt(sample_var+eps)
+        out=mout*gamma+beta
+        
+        #cache应该放什么,ruuning_mean和running_var有什么意义
+        cache=(x,gamma,beta,mout,sample_mean,sample_var,eps)
+        running_mean = momentum * running_mean + (1 - momentum) * sample_mean
+        running_var = momentum * running_var + (1 - momentum) * sample_var
+        
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -189,7 +204,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # then scale and shift the normalized data using gamma and beta.      #
         # Store the result in the out variable.                               #
         #######################################################################
-        pass
+        mout=(x-running_mean)/np.sqrt(running_var+eps)
+        out=mout*gamma+beta
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################
@@ -225,7 +241,38 @@ def batchnorm_backward(dout, cache):
     # TODO: Implement the backward pass for batch normalization. Store the    #
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
-    pass
+    
+    x,gamma,beta,mout,sample_mean,sample_var,eps=cache
+    
+    N = x.shape[0]
+    dgammax=dout
+    
+    dxhat=dout*gamma#xhat前向传播到两个分支
+    
+    dxmu1=dxhat/np.sqrt(sample_var+eps)#第一条分支x-mu
+    divar=np.sum(dxhat*(x-sample_mean),axis=0)#第二条分支
+    
+    dsqrtvar=-1/(sample_var+eps)*divar#1/x,x=(d,
+    
+    dvar=0.5*(sample_var+eps)**(-0.5)*dsqrtvar#np.sart(x),x=(d,
+    
+    dsq=dvar/N*np.ones_like(x)#x/n,x=(n,d)
+    
+    dxmu2=2*(x-sample_mean)*dsq#x**2
+    
+    dx1=dxmu1+dxmu2#两个后向传来的梯度汇聚到一个节点，前向传时需累加
+    
+    dmu=-1*np.sum(dxmu1+dxmu2,axis=0)#-x;;x=1/n求和xi，mu=(d
+    
+    dx2=1/N*np.ones_like(x)*dmu#y=x-mu，对x求导
+    dx=dx1+dx2
+    
+    dgamma = np.sum(dout * mout, axis = 0)
+    dbeta = np.sum(dout, axis = 0)
+    
+    
+    
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -255,7 +302,14 @@ def batchnorm_backward_alt(dout, cache):
     # should be able to compute gradients with respect to the inputs in a     #
     # single statement; our implementation fits on a single 80-character line.#
     ###########################################################################
-    pass
+    #这里不会写。。。
+    x,gamma,beta,x_,running_mean,running_var,eps=cache
+    N,D=x.shape
+    
+    dgamma=np.sum(dout*x_,axis=0)
+    dbeta=np.sum(dout,axis=0)
+    
+    dx=(1./N)*gamma*(running_var+eps)**(-1./2.)*(N*dout-np.sum(dout,axis=0)-(x-running_mean)*(running_var+eps)**(-1.0)*np.sum(dout*(x-running_mean),axis=0))
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -294,7 +348,10 @@ def dropout_forward(x, dropout_param):
         # TODO: Implement training phase forward pass for inverted dropout.   #
         # Store the dropout mask in the mask variable.                        #
         #######################################################################
-        pass
+        retain_prob=1.0-p
+        mask=np.random.binomial(n=1,p=retain_prob,size=x.shape)#即将生成一个0、1分布的向量，0表示这个神经元被屏蔽，不工作了，也就是dropout了
+       # 我们通过binomial函数，生成与x一样的维数向量。binomial函数就像抛硬币一样，我们可以把每个神经元当做抛硬币一样    # 硬币 正面的概率为p，n表示每        #个神经元试验的次数    # 因为我们每个神经元只需要抛一次就可以了所以n=1，size参数是我们有多少个硬币。
+        out=x*mask
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -302,11 +359,10 @@ def dropout_forward(x, dropout_param):
         #######################################################################
         # TODO: Implement the test phase forward pass for inverted dropout.   #
         #######################################################################
-        pass
+        out=x
         #######################################################################
         #                            END OF YOUR CODE                         #
         #######################################################################
-
     cache = (dropout_param, mask)
     out = out.astype(x.dtype, copy=False)
 
@@ -329,7 +385,7 @@ def dropout_backward(dout, cache):
         #######################################################################
         # TODO: Implement training phase backward pass for inverted dropout   #
         #######################################################################
-        pass
+        dx=dout*mask
         #######################################################################
         #                          END OF YOUR CODE                           #
         #######################################################################

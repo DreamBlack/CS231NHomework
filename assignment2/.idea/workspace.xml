@@ -1,52 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6153ac9a-9a9a-42a4-8dcf-ba6b216dd5c0" name="Default Changelist" comment="Fully-connected Neural Network">
-      <change afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Assignment1总结.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../assignment1/.ipynb_checkpoints/features-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../assignment1/.ipynb_checkpoints/softmax-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../assignment1/.ipynb_checkpoints/svm-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../assignment1/.ipynb_checkpoints/two_layer_net-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/assignment2.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.ipynb_checkpoints/FullyConnectedNets-checkpoint.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BatchNormalization.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ConvolutionalNetworks.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dropout.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FullyConnectedNets.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PyTorch.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TensorFlow.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/collectSubmission.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/classifiers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/classifiers/cnn.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/classifiers/fc_net.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/data_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/datasets/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/datasets/get_datasets.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/fast_layers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/gradient_check.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/im2col.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/im2col_cython.pyx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/layer_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/layers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/optim.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/setup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/solver.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/cs231n/vis_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frameworkpython" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/kitten.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/puppy.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/start_ipython_osx.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../assignment1/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../assignment1/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="6153ac9a-9a9a-42a4-8dcf-ba6b216dd5c0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -58,6 +14,7 @@
     <session id="-753467605">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.opened" value="1" />
         </counts>
@@ -120,10 +77,27 @@
       <option name="presentableId" value="Default" />
       <updated>1537371679122</updated>
     </task>
+    <task id="LOCAL-00001" summary="Fully-connected Neural Network">
+      <created>1537371986811</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1537371986811</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
+  <component name="TodoView" selected-index="4">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="7" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24966975" />

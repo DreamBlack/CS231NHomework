@@ -198,7 +198,23 @@ class FullyConnectedNet(object):
         # beta2, etc. Scale parameters should be initialized to one and shift      #
         # parameters should be initialized to zero.                                #
         ############################################################################
-        pass
+        #忘记{affine - [batch norm] - relu - [dropout]} x (L - 1) - affine - softmax
+        #如果有三层网络。其实有两个(affine-relu)*2再加一个affine+softmax
+        #input-affine1--W1,relu1-affine2--W2,relu2-affine3--W3，开始的时候漏了一个，导致精确度低
+        before_dim=input_dim
+        for idx,val in enumerate(hidden_dims):
+            W=np.random.normal(0,weight_scale,before_dim*val)
+            W=W.reshape((before_dim,val))
+            b=np.zeros(val)
+            self.params['W'+str(idx+1)]=W
+            self.params['b'+str(idx+1)]=b
+            
+            if self.use_batchnorm:
+                self.params['gamma'+str(idx+1)]=np.ones(val)
+                self.params['beta'+str(idx+1)]=np.zeros(val)
+            before_dim=val
+        self.params['W'+str(self.num_layers)]=np.random.randn(hidden_dims[-1],num_classes)
+        self.params['b'+str(self.num_layers)]=np.random.randn(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -256,7 +272,35 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        pass
+        #声明大小固定的list，如果只用out=[]，后面赋值out[i]=a是会报错的
+        outaff,cacheaff=list(range(self.num_layers+1 )),list(range(self.num_layers+1))
+        outrelu,cachrelu=list(range(self.num_layers )),list(range(self.num_layers))
+        outbn,cachebn=list(range(self.num_layers )),list(range(self.num_layers))
+        outdropout,cachedropout=list(range(self.num_layers )),list(range(self.num_layers))
+        #W,b应该从W1,b1开始
+        inX=X
+        for i in range(self.num_layers):
+            if i==self.num_layers-1:
+                
+                scores,cacheaff[self.num_layers]=affine_forward(inX,self.params['W'+str(self.num_layers)],self.params['b'+str(self.num_layers)])
+            else:
+                outaff[i+1],cacheaff[i+1]=affine_forward(inX,self.params['W'+str(i+1)],self.params['b'+str(i+1)])
+                outlast=outaff[i+1]
+                #batch normalization
+                if self.use_batchnorm:
+                    gammai,betai=self.params['gamma'+str(i+1)],self.params['beta'+str(i+1)]
+                    outbn[i+1],cachebn[i+1]=batchnorm_forward(outaff[i+1],gammai,betai,self.bn_params[i])
+                    outlast=outbn[i+1]
+                #relu
+                #这里写错了原来是outrelu[i+1],cachrelu[i+1]=relu_forward(outbn[i+1])，只考虑了有bn的情况，没有bn时，函数参数为空会造成错误
+                outlast,cachrelu[i+1]=relu_forward(outlast)
+                #dropout
+                if self.use_dropout:
+                    outlast,cachedropout[i+1]=dropout_forward(outlast,self.dropout_param)
+                    
+                inX=outlast
+            
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -279,7 +323,33 @@ class FullyConnectedNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        loss,dout=softmax_loss(scores,y)
+        for i in range(self.num_layers):
+            loss+=0.5*self.reg*(np.sum(self.params['W'+str(i+1)]**2))
+                
+        #解决loss,下面求grads
+        
+        #倒着取5-1
+        #这里写了好久。一是网络前向和后向所用函数顺序要搞清楚，二是各个函数forward和backward要保持的cache以及函数参数要注意
+        for i in range(self.num_layers,0,-1):
+            if i==self.num_layers:
+                dout,dw,db=affine_backward(dout,cacheaff[i])
+            else:
+                if self.use_dropout:
+                    dout=dropout_backward(dout,cachedropout[i])
+                    
+                dout=relu_backward(dout,cachrelu[i])
+                
+                if self.use_batchnorm:
+                    dout,dgamma,dbeta=batchnorm_backward(dout,cachebn[i])
+                    grads['gamma'+str(i)]=dgamma
+                    grads['beta'+str(i)]=dbeta
+                dout,dw,db=affine_backward(dout,cacheaff[i])
+            dw+=self.reg*self.params['W'+str(i)]
+                
+            grads['W'+str(i)]=dw
+            grads['b'+str(i)]=db
+        
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
