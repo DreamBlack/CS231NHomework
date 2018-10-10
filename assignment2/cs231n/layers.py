@@ -422,7 +422,30 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    #pad(array, pad_width, mode, **kwargs)，array——表示需要填充的数组，pad_width——表示每个轴（axis）边缘需要填充的数值数目。 
+    #参数输入方式为：（(before_1, after_1), … (before_N, after_N)），其中(before_1, after_1)表示第1轴两边缘分别填充before_1个和after_1个数值
+    #mode——表示填充的方式,‘constant’——表示连续填充相同的值，每个轴可以分别指定填充值，constant_values=（x, y）时前面用x填充，后面用y填充，
+    #缺省值填充0
+    pad=conv_param['pad']
+    stride=conv_param['stride']
+    N,C,H,W=x.shape
+    F,C,HH,WW=w.shape
+    x_pad=np.pad(x,((0,0),(0,0),(pad,pad),(pad,pad)),'constant')
+    new_h=int(1+(H+2*pad-HH)/stride)
+    new_w=int(1+(W+2*pad-WW)/stride)
+    out=np.zeros((x.shape[0],w.shape[0],new_h,new_w))
+    for i in range(N):
+        for j in range(F):
+            for xi in range(new_h):
+                for yi in range(new_w):
+                    out[i,j,xi,yi]=np.sum(x_pad[i,:,xi*stride:xi*stride+HH,yi*stride:yi*stride+WW]*w[j,:,:,:])
+                    #这里有个错找了好久好久，*w[j,:,:,:]而不是*w[i,:,:,:]
+                    #此处注意np.max(x[i,:,xi:xi+pool_height,yi:yi+pool_width])里是[i,:,..]而不是[i,j,..]，是所有通道的max，这样Out的size才会变成(F, C, HH, WW)
+                    
+
+            out[i,j,:,:]+=b[j]
+                    
+                   
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -447,10 +470,35 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    #先不要考虑卷积层反向怎么算，就使用上面函数里的中间变量，求中间梯度再会求卷积梯度
+    x,w,b,conv_param=cache
+    stride=conv_param['stride']
+    pad=conv_param['pad']
+    F,C,HH,WW=w.shape
+    N,C,H,W=x.shape
+    
+    new_h,new_w=int(1+(H+2*pad-HH)/stride),int(1+(W+2*pad-WW)/stride)
+    x_pad=np.pad(x,((0,0),(0,0),(pad,pad),(pad,pad)),'constant')
+    
+    dx_pad=np.zeros_like(x_pad)#中间变量的temp值
+    dw=np.zeros_like(w)
+    db=np.zeros_like(b)
+    
+    for i in range(N):
+        for j in range(F):
+            for xi in range(new_h):
+                for yi in range(new_w):
+                    dw[j,:,:,:]+=dout[i,j,xi,yi]*x_pad[i,:,xi*stride:xi*stride+HH,yi*stride:yi*stride+WW]
+                    dx_pad[i,:,xi*stride:xi*stride+HH,yi*stride:yi*stride+WW]+=dout[i,j,xi,yi]*w[j,:,:,:]
+
+            db[j]+=np.sum(dout[i,j,:,:])
+    
+    
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
+    dx=dx_pad[:,:,pad:pad+H,pad:pad+W]
     return dx, dw, db
 
 
@@ -473,7 +521,19 @@ def max_pool_forward_naive(x, pool_param):
     ###########################################################################
     # TODO: Implement the max pooling forward pass                            #
     ###########################################################################
-    pass
+    N,C,H,W=x.shape
+    stride=pool_param['stride']
+    pool_height=pool_param['pool_height']
+    pool_width=pool_param['pool_width']
+    
+    new_h,new_w=int(1+(H-pool_height)/stride),int(1+(W-pool_width)/stride)
+    
+    out=np.zeros((N,C,new_h,new_w))
+    for i in range(N):
+        for j in range(C):
+            for xi in range(new_h):
+                for yi in range(new_w):
+                    out[i,j,xi,yi]=np.max(x[i,j,xi*stride:xi*stride+pool_height,yi*stride:yi*stride+pool_width])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -496,7 +556,27 @@ def max_pool_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the max pooling backward pass                           #
     ###########################################################################
-    pass
+    x,pool_param=cache
+    N,C,H,W=x.shape
+    stride=pool_param['stride']
+    pool_height=pool_param['pool_height']
+    pool_width=pool_param['pool_width']
+    
+    new_h,new_w=int(1+(H-pool_height)/stride),int(1+(W-pool_width)/stride)
+    dx=np.zeros_like(x)
+    for i in range(N):
+        for j in range(C):
+            for xi in range(new_h):
+                for yi in range(new_w):
+                    x_mask=x[i,j,xi*stride:xi*stride+pool_height,yi*stride:yi*stride+pool_width]
+                    #max_id=np.argmax(np.mat(x_mask))
+                    #max_idx=int(max_id/pool_height)+xi*stride
+                    #max_idy=max_id%pool_width+yi*stride
+                    flags=np.max(x_mask,axis=(0,1),keepdims=True)==x_mask
+                    dx[i,j,xi*stride:xi*stride+pool_height,yi*stride:yi*stride+pool_width]+=dout[i,j,xi,yi]*flags
+                    #dx[i,j,max_idx,max_idy]+=dout[i,j,xi,yi]
+                    #这里可以使用两种方法
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
