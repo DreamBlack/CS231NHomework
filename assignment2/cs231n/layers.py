@@ -614,7 +614,15 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    pass
+    #在cnn中我们可以把每个特征图看成是一个特征处理（一个神经元），因此在使用Batch Normalization，mini-batch size 的大小
+    #就是：m*p*q，于是对于每个特征图都只有一对可学习参数：γ、β
+    N,C,H,W=x.shape
+    newx=x.transpose(0,2,3,1).reshape(-1,C)#x.reshape((N*H*W,C))，光这样是不行的，应该先设法让N, C, H, W中的C成为最后一个维度，然后才能用这句话
+    #这样才能保证是将原矩阵转换成C个N*H*W，直接reshape可能会将N*C*H*W先变成一维，然后分成?*C维，这样就不对了
+    out,cache=batchnorm_forward(newx, gamma, beta, bn_param)
+    out=out.reshape(N,H,W,C).transpose(0,3,1,2)#最后要把out的维度改回来
+    
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -644,7 +652,10 @@ def spatial_batchnorm_backward(dout, cache):
     # version of batch normalization defined above. Your implementation should#
     # be very short; ours is less than five lines.                            #
     ###########################################################################
-    pass
+    N,C,H,W=dout.shape
+    newdout=dout.transpose(0,2,3,1).reshape(-1,C)#x.reshape((N*H*W,C))，光这样是不行的，应该先设法让N, C, H, W中的C成为最后一个维度，然后才能用这句话
+    dx,dgamma,dbeta=batchnorm_backward(newdout,cache)
+    dx=dx.reshape(N,H,W,C).transpose(0,3,1,2)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################

@@ -48,7 +48,28 @@ class ThreeLayerConvNet(object):
         # hidden affine layer, and keys 'W3' and 'b3' for the weights and biases   #
         # of the output affine layer.                                              #
         ############################################################################
-        pass
+        C,H,W=input_dim
+        F=num_filters
+        W1=weight_scale*np.random.randn(F,C,filter_size,filter_size)#别忘了乘通道数
+        b1=np.zeros(F)
+        #np.random.normal和np.random.randn
+        #2*2不加填充和2步长的maxpool会是输入长度减半
+        #但是有个问题，卷积的时候，不是也会时特征图大小发生变化么，先按下不表
+        #解答：因为下面求Loss时候，设定了会让卷积之后图片大小不发生变化的pad,stride
+        #上一步之后size=f*newh*neww,但是下面affine的时候不论输入时什么样的都会，把它变成n*d这种二维的再进行计算，所以w2是二维的就行,且输出也是二维的
+        
+        W2=weight_scale*np.random.randn(F*int(H/2)*int(W/2),hidden_dim)
+        b2=np.zeros(hidden_dim)
+        
+        W3=weight_scale*np.random.randn(hidden_dim,num_classes)
+        b3=np.zeros(num_classes)
+        
+        self.params['W1']=W1
+        self.params['b1']=b1
+        self.params['W2']=W2
+        self.params['b2']=b2
+        self.params['W3']=W3
+        self.params['b3']=b3
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -69,7 +90,7 @@ class ThreeLayerConvNet(object):
 
         # pass conv_param to the forward pass for the convolutional layer
         filter_size = W1.shape[2]
-        conv_param = {'stride': 1, 'pad': (filter_size - 1) // 2}
+        conv_param = {'stride': 1, 'pad': (filter_size - 1) // 2}#" // " 表示整数除法,返回不大于结果的一个最大的整数
 
         # pass pool_param to the forward pass for the max-pooling layer
         pool_param = {'pool_height': 2, 'pool_width': 2, 'stride': 2}
@@ -80,7 +101,11 @@ class ThreeLayerConvNet(object):
         # computing the class scores for X and storing them in the scores          #
         # variable.                                                                #
         ############################################################################
-        pass
+        #conv - relu - 2x2 max pool - affine - relu - affine - softmax
+        #softmax之前没有relu
+        out,cache1=conv_relu_pool_forward(X, W1, b1, conv_param, pool_param)
+        out,cache2=affine_relu_forward(out, W2, b2)
+        scores,cache3=affine_forward(out, W3, b3)#!!!!!!最后一步是affine，没有relu了
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -95,7 +120,26 @@ class ThreeLayerConvNet(object):
         # data loss using softmax, and make sure that grads[k] holds the gradients #
         # for self.params[k]. Don't forget to add L2 regularization!               #
         ############################################################################
-        pass
+        loss,dout=softmax_loss(scores,y)
+        loss+=0.5*self.reg*(np.sum(W1**2)+np.sum(W2**2)+np.sum(W3**2))
+        
+        #解决loss，下面求grads
+        
+        dout,dW3,db3=affine_backward(dout, cache3)
+        dout,dW2,db2=affine_relu_backward(dout, cache2)
+        dout,dW1,db1=conv_relu_pool_backward(dout, cache1)
+        
+        #求梯度的时候不要忘了加上reg的部分
+        dW1+=self.reg*W1
+        dW2+=self.reg*W2
+        dW3+=self.reg*W3
+        
+        grads['W1']=dW1
+        grads['b1']=db1
+        grads['W2']=dW2
+        grads['b2']=db2
+        grads['W3']=dW3
+        grads['b3']=db3#b3算的不对，因为!!!!!!最后一步是affine，没有relu了
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
